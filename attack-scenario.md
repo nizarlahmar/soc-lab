@@ -91,7 +91,7 @@ And we are officially inside the internal network! We can try escalating privile
 Further pivoting should be straightforward from here on out, depending on what other internal machines are visible from our current pivot point.
 
 # Actions on Objectives
-When on DVWA, we could've sabotaged the web application or attempted reading non-public files, and when on Internal 1, we could potentially exfiltrate sensitive data.
+When on DVWA, we could've sabotaged the web application or attempted reading non-public files. And when on Internal 1, we could potentially exfiltrate sensitive data.
 
 # Final Notes
 The process of attacking this environment is fairly rudimentary and depended on some misconfigurations that are realistically rare nowadays, such as anon FTP access, extremely weak passwords for employee accounts, and an interface connecting a DMZ machine to an internal one. Nonetheless, it demonstrates that if there are multiple vulnerabilities, they can easily be chained together by an outside party to establish a foothold on your network.
