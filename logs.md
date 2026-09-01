@@ -69,7 +69,7 @@ After a bunch of logs related to file creation (mostly due to SSH authentication
 Seeing this preceded by the `john` SSH connection showcases possible privilege escalation, more specifically of the vertical kind (since we're elevating privileges).
 
 ## Logs: Custom C2
-The custom C2 agent on `internal-1` generated no meaningful Wazuh alerts — only "Listened ports status" events, which showed the local listening socket but contained nothing tying the activity back to the C2 server it was beaconing to.
+The custom C2 agent on `internal-1` generated no meaningful Wazuh alerts — only "Listened ports status" events, which showed the local listening socket but never linked the activity back to the C2 server on the CachyOS host it was beaconing to.
 
 <img width="628" height="269" alt="Screenshot_20260826_221744" src="https://github.com/user-attachments/assets/796e7101-731e-4a0f-bd13-6b63cca505d3" />
 
