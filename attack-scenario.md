@@ -93,6 +93,19 @@ Further pivoting should be straightforward from here on out, depending on what o
 # Actions on Objectives
 When on DVWA, we could've sabotaged the web application or attempted reading non-public files. And when on Internal 1, we could potentially exfiltrate sensitive data.
 
+# Post-Exploitation: Custom C2
+I coded a basic C2 framework ([find it here](https://github.com/nizarlahmar/basic-c2)). It houses an agent which queues commands from a server and subsequently executes them on the system and sends back output. I decided to try out this agent on the `internal-1` machine. The rationale is that this agent executable landed on this internal machine via malware or an insider threat.
+
+Below is a screenshot showing the agent establishing an outbound connection to the C2 server running on the host machine (this technically wouldn't be possible given that they're not on the same network, but it suffices for the demonstration; realistically, the agent would probably connect to a public IP).
+
+<img width="777" height="148" alt="Screenshot_20260825_214143" src="https://github.com/user-attachments/assets/e84fdb96-1708-41b2-97d7-9796abd20e42" />
+
+Below is a screenshot showing the server end.
+
+<img width="529" height="195" alt="Screenshot_20260825_214121" src="https://github.com/user-attachments/assets/aa3b505f-f16f-48f8-a2d9-4afbf05652f3" />
+
+After this, I sent out a few auxiliary commands to check the environment (e.g., `id` and similar recon through the agent; under default Wazuh rules none of it generated alerts — see `logs.md`). Since the agent runs with the user's privileges, it can be used as a foothold to run further commands, pull down additional tooling, or pivot — the same position a real post-exploitation implant provides.
+
 # Final Notes
 The process of attacking this environment is fairly rudimentary and depended on some misconfigurations that are realistically rare nowadays, such as anon FTP access, extremely weak passwords for employee accounts, and an interface connecting a DMZ machine to an internal one. Nonetheless, it demonstrates that if there are multiple vulnerabilities, they can easily be chained together by an outside party to establish a foothold on your network.
 
