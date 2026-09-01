@@ -68,6 +68,49 @@ After a bunch of logs related to file creation (mostly due to SSH authentication
 
 Seeing this preceded by the `john` SSH connection showcases possible privilege escalation, more specifically of the vertical kind (since we're elevating privileges).
 
+## Logs: Custom C2
+The custom C2 agent on `internal-1` generated no meaningful Wazuh alerts — only "Listened ports status" events, which showed the local listening socket but contained nothing tying the activity back to the C2 server it was beaconing to.
+
+<img width="628" height="269" alt="Screenshot_20260826_221744" src="https://github.com/user-attachments/assets/796e7101-731e-4a0f-bd13-6b63cca505d3" />
+
+
+# Immediate Fixes
+
+Initial access came from a PHP web shell uploaded through DVWA. Since the rest of
+the chain depended on that foothold, the upload/execution path was closed first.
+
+Default rules tag DVWA access events (`100002`) but don't separate a request for
+an uploaded PHP file from normal traffic. Added `100003` to flag it and raise the
+alert to level 12:
+
+```xml
+<group name="web,apache,dvwa,attack,">
+  <rule id="100003" level="12">
+    <if_sid>100002</if_sid>
+    <url type="pcre2">/hackable/uploads/.+\.php</url>
+    <description>Web shell execution: request for uploaded PHP file</description>
+    <group>web_shell,attack,T1505_003,</group>
+  </rule>
+</group>
+```
+
+`url` is a static field (defaults to OS_Regex, where `\.` means *any* char, not a
+literal dot), so it's set to `type="pcre2"` for normal regex; left unanchored to
+catch shells called with parameters.
+
+Verified in `wazuh-logtest` (fires `100003`/level 12 on the shell, stays
+`100002`/level 6 on a benign request) and live in the dashboard after a manager
+restart.
+
+Below is a screenshot demonstrating the new rule generating a custom alert on Wazuh's dashboard.
+
+<img width="1961" height="103" alt="image" src="https://github.com/user-attachments/assets/015a30ed-e9f3-4ca9-8574-dcad21e37795" />
+
+
+<img width="1715" height="359" alt="image" src="https://github.com/user-attachments/assets/d15f2a0b-7665-4345-9add-e64ef83beafe" />
+
+
+Obviously, other fixes are in order, such as rules allowing broader detection of tampered HTTP requests.
+
 # Final Notes
 The collected logs demonstrate the visibility, or lack thereof, when it comes to using a SIEM. Although not exhaustive, many logs here, like the one with `php-reverse-shell`, the installation of unwanted packages, the FTP connection from a web-server, etc. would've caused SOC staff to intervene, likely stopping the attack. Nevertheless, they could also be drowned out in noise, and evasion is possible since these can happen in a few minutes at most, which is why several factors must be prioritized, like full visibility, quick detection and response, and automation.
-
